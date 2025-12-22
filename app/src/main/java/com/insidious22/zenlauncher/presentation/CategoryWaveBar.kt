@@ -49,12 +49,12 @@ fun CategoryWaveBar(
     }
 
     LaunchedEffect(activeIndex, widthPx) {
-        if (widthPx > 1f) { // Ensure width is calculated
+        if (widthPx > 1f) {
             val target = activeIndex * itemW()
             highlightX.animateTo(
                 target,
                 animationSpec = spring(
-                    dampingRatio = 0.8f, // A bit more bouncy
+                    dampingRatio = 0.8f,
                     stiffness = Spring.StiffnessMedium
                 )
             )

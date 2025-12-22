@@ -61,7 +61,6 @@ fun ZenAppWidget(
                     hostView
                 },
                 update = { view ->
-                    // opcional: puedes ajustar opciones/tamaño aquí si quieres
                     view.setPadding(0, 0, 0, 0)
                 }
             )

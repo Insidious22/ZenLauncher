@@ -8,10 +8,8 @@ import com.insidious22.zenlauncher.presentation.HomeScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        // Edge-to-edge real (System UI feel)
         enableEdgeToEdge()
+        super.onCreate(savedInstanceState)
 
         setContent {
             HomeScreen()

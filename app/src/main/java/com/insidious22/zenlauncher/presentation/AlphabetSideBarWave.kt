@@ -1,117 +1,90 @@
 package com.insidious22.zenlauncher.presentation
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
+import kotlin.math.pow
 
 @Composable
 fun AlphabetSideBarWave(
     letters: List<String>,
-    onLetterSelected: (index: Int) -> Unit,
+    onInteraction: (Float?) -> Unit,
+    onLetterSelected: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    if (letters.isEmpty()) return
-
     var size by remember { mutableStateOf(IntSize.Zero) }
+    var globalYOffset by remember { mutableStateOf(0f) }
     var fingerY by remember { mutableStateOf<Float?>(null) }
-    var lastSelectedIndex by remember { mutableStateOf(-1) }
-
-    fun indexFromY(y: Float): Int {
-        val h = size.height.toFloat().coerceAtLeast(1f)
-        val itemH = h / letters.size.toFloat().coerceAtLeast(1f)
-        return (y / itemH).toInt().coerceIn(0, letters.size - 1)
-    }
-
-    val density = LocalDensity.current
 
     Box(
         modifier = modifier
-            .width(52.dp)
+            .width(80.dp)
             .fillMaxHeight()
-            .padding(end = 10.dp)
-            .clip(RoundedCornerShape(999.dp))
-            .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.06f))
+            .onGloballyPositioned { globalYOffset = it.positionInWindow().y }
             .onSizeChanged { size = it }
             .pointerInput(letters) {
                 detectVerticalDragGestures(
                     onDragStart = { offset ->
                         fingerY = offset.y
-                        val index = indexFromY(offset.y)
-                        if (index != lastSelectedIndex) {
-                            onLetterSelected(index)
-                            lastSelectedIndex = index
-                        }
+                        onInteraction(offset.y + globalYOffset)
+                        onLetterSelected((offset.y / (size.height / letters.size.toFloat())).toInt().coerceIn(0, letters.size - 1))
                     },
                     onVerticalDrag = { change, _ ->
                         fingerY = change.position.y
-                        val index = indexFromY(change.position.y)
-                        if (index != lastSelectedIndex) {
-                            onLetterSelected(index)
-                            lastSelectedIndex = index
-                        }
-                        change.consume()
+                        onInteraction(change.position.y + globalYOffset)
+                        onLetterSelected((change.position.y / (size.height / letters.size.toFloat())).toInt().coerceIn(0, letters.size - 1))
                     },
-                    onDragEnd = { fingerY = null },
-                    onDragCancel = { fingerY = null }
+                    onDragEnd = {
+                        fingerY = null
+                        onInteraction(null)
+                    },
+                    onDragCancel = {
+                        fingerY = null
+                        onInteraction(null)
+                    }
                 )
-            }
+            },
+        contentAlignment = Alignment.CenterEnd
     ) {
         Column(
-            Modifier
-                .fillMaxSize()
-                .padding(vertical = 10.dp),
+            Modifier.fillMaxHeight(),
             verticalArrangement = Arrangement.SpaceEvenly,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.End
         ) {
             letters.forEachIndexed { i, ch ->
-                val centerY = if (size.height == 0) 0f else {
-                    val itemH = size.height / letters.size.toFloat()
-                    (i * itemH) + itemH / 2f
-                }
-
+                val itemH = if (size.height > 0) size.height / letters.size.toFloat() else 1f
+                val centerY = (i * itemH) + itemH / 2f
                 val dist = fingerY?.let { abs(it - centerY) } ?: Float.MAX_VALUE
-                
-                val waveWidth = size.height * 0.3f
-                val t = (1f - (dist / waveWidth)).coerceIn(0f, 1f)
-                val easedT = (0.5f - 0.5f * cos(t * PI.toFloat()))
-
-                val scale = 1f + 0.4f * easedT
-                val translationX = with(density) { (-12).dp.toPx() } * easedT
-                val alpha = 0.5f + 0.5f * easedT
+                val t = (1f - (dist / 280f)).coerceIn(0f, 1f)
+                val wave = (0.5f - 0.5f * cos(t * PI.toFloat())).pow(1.8f)
 
                 Text(
                     text = ch,
                     fontSize = 11.sp,
-                    color = ZenPalette.Cream, // Use full color, adjust with alpha
-                    modifier = Modifier.graphicsLayer {
-                        this.scaleX = scale
-                        this.scaleY = scale
-                        this.translationX = translationX
-                        this.alpha = alpha
-                    }
+                    fontWeight = if (wave > 0.5f) FontWeight.Black else FontWeight.Normal,
+                    color = ZenPalette.DeepBlack.copy(alpha = 0.3f + (0.7f * wave)),
+                    modifier = Modifier
+                        .padding(end = 12.dp)
+                        .graphicsLayer {
+                            scaleX = 1f + (2.5f * wave)
+                            scaleY = 1f + (2.5f * wave)
+                            translationX = -(wave * 90f).dp.toPx()
+                        }
                 )
             }
         }

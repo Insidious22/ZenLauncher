@@ -5,8 +5,6 @@ import com.insidious22.zenlauncher.domain.Category
 
 class CategoryClassifier {
 
-    // Heurística simple (estable) por packageName y label.
-    // Luego la hacemos configurable con SettingsStore si quieres.
     fun categoryFor(app: AppModel): Set<Category> {
         val pkg = app.packageName.lowercase()
         val name = app.label.lowercase()
@@ -20,7 +18,6 @@ class CategoryClassifier {
     }
 
     private fun isWork(pkg: String, name: String): Boolean {
-        // Suite Google / Microsoft / Notion / Slack / Zoom / Teams / GitHub, etc.
         val workPkgs = listOf(
             "com.google.android.apps.docs",
             "com.google.android.apps.docs.editors",
@@ -39,7 +36,7 @@ class CategoryClassifier {
             "com.microsoft.teams",
             "us.zoom.videomeetings",
             "com.slack",
-            "com.discord", // a veces work/estudio; si no lo quieres, lo quitamos
+            "com.discord",
             "com.notion",
             "com.github.android",
             "com.atlassian"

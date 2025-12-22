@@ -30,7 +30,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private val _selectedCategory = MutableStateFlow(Category.ALL)
     val selectedCategory: StateFlow<Category> = _selectedCategory.asStateFlow()
 
-    // cache: package -> categories
     private val _categoryMap = MutableStateFlow<Map<String, Set<Category>>>(emptyMap())
 
     val filteredAppsFlow: StateFlow<List<AppModel>> =

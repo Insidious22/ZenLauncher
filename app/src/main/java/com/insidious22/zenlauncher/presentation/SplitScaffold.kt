@@ -15,36 +15,27 @@ fun SplitScaffold(
     leftContent: @Composable ColumnScope.() -> Unit,
     rightContent: @Composable ColumnScope.() -> Unit
 ) {
-    Row(modifier.fillMaxSize()) {
-
+    Row(modifier = modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxHeight()
                 .weight(leftRatio)
-                .background(ZenPalette.Peach),
+                .background(ZenPalette.LightPeach),
             content = leftContent
         )
 
-        // Seam shadow (queda justo en la división, sin offsets raros)
         Box(
             modifier = Modifier
                 .fillMaxHeight()
-                .width(14.dp)
-                .background(
-                    Brush.horizontalGradient(
-                        colors = listOf(
-                            Color.Black.copy(alpha = 0.18f),
-                            Color.Transparent
-                        )
-                    )
-                )
+                .width(1.dp)
+                .background(Color.Black.copy(alpha = 0.1f))
         )
 
         Column(
             modifier = Modifier
                 .fillMaxHeight()
                 .weight(1f - leftRatio)
-                .background(ZenPalette.Brown),
+                .background(ZenPalette.DarkPeach),
             content = rightContent
         )
     }

@@ -4,18 +4,16 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Density
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.insidious22.zenlauncher.domain.Category
 import com.insidious22.zenlauncher.domain.ZenSettings
 import com.insidious22.zenlauncher.ui.theme.ZenLauncherTheme
 import kotlinx.coroutines.launch
@@ -23,7 +21,6 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
-
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
 
@@ -31,131 +28,90 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
     val favorites by viewModel.favoritesFlow.collectAsState(initial = emptySet())
     val settings by viewModel.settingsFlow.collectAsState(initial = ZenSettings())
     val searchText by viewModel.searchQuery.collectAsState()
-    val selectedCategory by viewModel.selectedCategory.collectAsState()
 
+    var interactionY by remember { mutableStateOf<Float?>(null) }
     var showSettings by remember { mutableStateOf(false) }
+    val pagerState = rememberPagerState(pageCount = { 3 })
 
-    val letters = remember(apps) {
-        apps.mapNotNull { it.label.firstOrNull()?.uppercaseChar()?.toString() }
-            .distinct()
-            .sorted()
-    }
-
-    val letterToIndex = remember(apps) {
-        buildMap<String, Int> {
-            apps.forEachIndexed { index, app ->
-                val c = app.label.firstOrNull()?.uppercaseChar() ?: return@forEachIndexed
-                val key = c.toString()
-                if (!containsKey(key)) put(key, index)
-            }
-        }
-    }
-
-    BackHandler(enabled = true) {
-        when {
-            searchText.isNotEmpty() -> viewModel.onSearchTextChange("")
-            showSettings -> showSettings = false
-            else -> Unit
+    BackHandler(enabled = showSettings || searchText.isNotEmpty()) {
+        if (showSettings) {
+            showSettings = false
+        } else {
+            viewModel.onSearchTextChange("")
         }
     }
 
     ZenLauncherTheme(themeMode = settings.themeMode) {
+        Box(modifier = Modifier.fillMaxSize()) {
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(ZenPalette.BgDark) // Fondo negro total
-        ) {
-
-            val contentModifier = if (showSettings) {
-                Modifier.blur(radius = 12.dp)
-            } else {
-                Modifier
+            Row(Modifier.fillMaxSize()) {
+                Box(Modifier.weight(0.58f).fillMaxHeight().background(ZenPalette.LightPeach))
+                Box(Modifier.weight(0.42f).fillMaxHeight().background(ZenPalette.DarkPeach))
             }
 
-            SplitScaffold(
-                modifier = contentModifier,
-                leftRatio = settings.splitRatio.coerceIn(0.35f, 0.55f),
+            val contentModifier = if (showSettings) Modifier.blur(20.dp) else Modifier
 
-                leftContent = {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(ZenPalette.Peach) // Gris muy oscuro
-                            .padding(24.dp)
-                            .pullDownToOpen(
-                                enabled = !showSettings,
-                                threshold = 44.dp
-                            ) { showSettings = true },
-                        contentAlignment = Alignment.Center // Reloj centrado para el look minimalista
-                    ) {
-                        ClockWidget(
-                            clockScale = settings.clockTextScale,
-                            onOpenSettings = { showSettings = true }
-                        )
-                    }
-                },
+            Column(modifier = contentModifier.fillMaxSize().statusBarsPadding()) {
 
-                rightContent = {
-                    val density = LocalDensity.current
-                    CompositionLocalProvider(
-                        LocalDensity provides Density(
-                            density = density.density,
-                            fontScale = settings.appTextScale
-                        )
-                    ) {
-                        Box(Modifier.fillMaxSize()) {
-                            Column(Modifier.fillMaxSize()) {
-
-                                // Barra de categorías
-                                CategoryWaveBar(
-                                    categories = listOf(
-                                        Category.ALL,
-                                        Category.FAVORITES,
-                                        Category.WORK,
-                                        Category.MEDIA
-                                    ),
-                                    selected = selectedCategory,
-                                    onSelected = { /* Animación visual */ },
-                                    onSelectedCommit = { viewModel.setCategory(it) },
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)
-                                )
-
-                                AppsPanel(
-                                    apps = apps,
-                                    favorites = favorites,
-                                    query = searchText,
-                                    showSearch = settings.showSearch,
-                                    monochromeIcons = settings.monochromeIcons,
-                                    listState = listState,
-                                    onQueryChange = viewModel::onSearchTextChange,
-                                    onToggleFavorite = viewModel::toggleFavorite
-                                )
-                            }
-
-                            if (settings.showAlphabet && letters.isNotEmpty()) {
-                                AlphabetSideBarWave(
-                                    letters = letters,
-                                    onLetterSelected = { idx ->
-                                        val letter = letters.getOrNull(idx) ?: return@AlphabetSideBarWave
-                                        val targetIndex = letterToIndex[letter] ?: return@AlphabetSideBarWave
-                                        scope.launch { listState.animateScrollToItem(targetIndex) }
-                                    },
-                                    modifier = Modifier
-                                        .align(Alignment.CenterEnd)
-                                        .padding(vertical = 18.dp)
-                                )
+                Box(modifier = Modifier.weight(0.35f)) {
+                    HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
+                        if (page == 0) {
+                            ClockWidget(
+                                clockScale = settings.clockTextScale,
+                                onOpenSettings = { showSettings = true }
+                            )
+                        } else {
+                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Text("Desliza para volver", color = ZenPalette.DeepBlack.copy(0.2f))
                             }
                         }
                     }
                 }
-            )
+
+                Box(modifier = Modifier.weight(0.65f)) {
+
+                    AppsPanel(
+                        apps = apps,
+                        interactionY = interactionY,
+                        listState = listState,
+                        favorites = favorites,
+                        query = searchText,
+                        showSearch = settings.showSearch,
+                        monochromeIcons = settings.monochromeIcons,
+                        onQueryChange = viewModel::onSearchTextChange,
+                        onToggleFavorite = viewModel::toggleFavorite,
+                        onOpenSettings = { showSettings = true }
+                    )
+
+                    val letters = remember(apps) {
+                        apps.map { it.label.firstOrNull()?.uppercase() ?: "" }
+                            .distinct()
+                            .sorted()
+                    }
+
+                    AlphabetSideBarWave(
+                        letters = letters,
+                        onInteraction = { y -> interactionY = y },
+                        onLetterSelected = { index ->
+                            scope.launch {
+                                val char = letters.getOrNull(index) ?: return@launch
+                                val appIndex = apps.indexOfFirst { it.label.startsWith(char, ignoreCase = true) }
+                                if (appIndex != -1) {
+                                    listState.scrollToItem(appIndex)
+                                }
+                            }
+                        },
+                        modifier = Modifier.align(Alignment.CenterEnd)
+                    )
+                }
+            }
 
             if (showSettings) {
                 ModalBottomSheet(
                     onDismissRequest = { showSettings = false },
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    dragHandle = null
+                    dragHandle = null,
+                    containerColor = ZenPalette.DeepBlack,
+                    scrimColor = Color.Black.copy(alpha = 0.5f)
                 ) {
                     SettingsSheet(
                         settings = settings,

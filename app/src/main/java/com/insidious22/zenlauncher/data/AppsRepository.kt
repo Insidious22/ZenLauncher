@@ -17,7 +17,6 @@ import kotlinx.coroutines.withContext
 
 class AppsRepository(private val context: Context) {
 
-    // Cache liviana para evitar regenerar iconos siempre
     private val iconCache = LruCache<String, ImageBitmap>(220)
 
     suspend fun getInstalledApps(): List<AppModel> = withContext(Dispatchers.IO) {

@@ -1,7 +1,6 @@
 package com.insidious22.zenlauncher.presentation
 
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -9,12 +8,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.delay
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -22,70 +18,43 @@ import java.util.Locale
 @Composable
 fun ClockWidget(
     clockScale: Float = 1.0f,
-    onOpenSettings: () -> Unit,
+    onOpenSettings: () -> Unit
 ) {
-    var time by remember { mutableStateOf(LocalTime.now()) }
+    val time = LocalTime.now()
 
-    // Actualizador de tiempo cada segundo
-    LaunchedEffect(Unit) {
-        while (true) {
-            time = LocalTime.now()
-            delay(1000)
-        }
-    }
-
-    val timeFmt = remember { DateTimeFormatter.ofPattern("HH:mm") }
-    val dateFmt = remember { DateTimeFormatter.ofPattern("EEE, dd MMM", Locale.getDefault()) }
-
-    // El progreso va de 0.0 a 1.0 según los segundos actuales
-    val secondsProgress = time.second / 60f
-
-    Box(
-        contentAlignment = Alignment.Center,
+    Column(
         modifier = Modifier
-            .size((240.dp * clockScale))
+            .padding(start = 45.dp, top = 40.dp)
             .clickable(
-                onClick = onOpenSettings,
+                interactionSource = remember { MutableInteractionSource() },
                 indication = null,
-                interactionSource = remember { MutableInteractionSource() }
-            )
+                onClick = onOpenSettings
+            ),
+        horizontalAlignment = Alignment.Start
     ) {
-        // Anillo de progreso dinámico (Como el del video)
-        Canvas(modifier = Modifier.fillMaxSize().padding(10.dp)) {
-            // Círculo de fondo (muy tenue)
-            drawCircle(
-                color = ZenPalette.Cream.copy(alpha = 0.05f),
-                style = Stroke(width = 3.dp.toPx())
-            )
-            // Anillo que se mueve
-            drawArc(
-                color = ZenPalette.Cream,
-                startAngle = -90f,
-                sweepAngle = 360f * secondsProgress,
-                useCenter = false,
-                style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round)
-            )
-        }
+        Box(
+            modifier = Modifier
+                .width(1.5.dp)
+                .height(140.dp)
+                .background(ZenPalette.DeepBlack)
+        )
+        Text("▼", fontSize = 10.sp, color = ZenPalette.DeepBlack, modifier = Modifier.offset(x = (-4).dp, y = (-4).dp))
 
-        // Hora y Fecha centradas
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = time.format(timeFmt),
-                fontSize = (72.sp * clockScale),
-                fontWeight = FontWeight.ExtraLight, // Estilo fino del video
-                color = ZenPalette.PeachText,
-                letterSpacing = (-2).sp
-            )
-            Text(
-                text = java.time.LocalDate.now().format(dateFmt).uppercase(),
-                fontSize = (12.sp * clockScale),
-                fontWeight = FontWeight.Bold,
-                color = ZenPalette.PeachText.copy(alpha = 0.4f),
-                letterSpacing = 3.sp
-            )
-        }
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text(
+            text = "It's ${time.format(DateTimeFormatter.ofPattern("hh:mm a"))}",
+            fontSize = (20.sp * clockScale),
+            fontWeight = FontWeight.Black,
+            color = ZenPalette.DeepBlack,
+            letterSpacing = (-1).sp
+        )
+        Text(
+            text = java.time.LocalDate.now().format(DateTimeFormatter.ofPattern("EEEE, d MMM", Locale.ENGLISH)).uppercase(),
+            fontSize = (11.sp * clockScale),
+            fontWeight = FontWeight.Bold,
+            color = ZenPalette.DeepBlack.copy(alpha = 0.6f),
+            letterSpacing = 1.sp
+        )
     }
 }
