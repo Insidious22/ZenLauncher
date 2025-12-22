@@ -1,8 +1,8 @@
 package com.insidious22.zenlauncher.presentation
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,66 +24,67 @@ fun SettingsSheet(
     onHapticChange: (Boolean) -> Unit,
     onThemeModeChange: (ThemeMode) -> Unit
 ) {
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 18.dp, vertical = 14.dp)
-            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 18.dp)
+            .padding(bottom = 18.dp),
+        contentPadding = PaddingValues(
+            top = 14.dp,
+            bottom = 18.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+        )
     ) {
-        Row(
-            Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                "Settings",
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.weight(1f)
+        item {
+            Row(
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "Settings",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.weight(1f)
+                )
+                TextButton(onClick = onClose) { Text("Done") }
+            }
+
+            Spacer(Modifier.height(14.dp))
+            SectionTitle("Theme")
+            ThemeChips(selected = settings.themeMode, onSelect = onThemeModeChange)
+
+            Spacer(Modifier.height(18.dp))
+            SectionTitle("Layout")
+            LabeledSlider(
+                label = "Split ratio",
+                value = settings.splitRatio,
+                valueRange = 0.35f..0.55f,
+                onValueChange = onSplitRatioChange
             )
-            TextButton(onClick = onClose) { Text("Done") }
+
+            Spacer(Modifier.height(18.dp))
+            SectionTitle("Visibility")
+            SwitchRow("Show search", settings.showSearch, onShowSearchChange)
+            SwitchRow("Alphabet sidebar", settings.showAlphabet, onShowAlphabetChange)
+
+            Spacer(Modifier.height(18.dp))
+            SectionTitle("Typography")
+            LabeledSlider(
+                label = "App text scale",
+                value = settings.appTextScale,
+                valueRange = 0.85f..1.20f,
+                onValueChange = onAppTextScaleChange
+            )
+            LabeledSlider(
+                label = "Clock text scale",
+                value = settings.clockTextScale,
+                valueRange = 0.90f..1.30f,
+                onValueChange = onClockTextScaleChange
+            )
+
+            Spacer(Modifier.height(18.dp))
+            SectionTitle("Style")
+            SwitchRow("Monochrome icons", settings.monochromeIcons, onMonochromeIconsChange)
+            SwitchRow("Haptic feedback", settings.haptic, onHapticChange)
         }
-
-        Spacer(Modifier.height(14.dp))
-        SectionTitle("Theme")
-        ThemeChips(selected = settings.themeMode, onSelect = onThemeModeChange)
-
-        Spacer(Modifier.height(18.dp))
-        SectionTitle("Layout")
-        LabeledSlider(
-            label = "Split ratio",
-            value = settings.splitRatio,
-            valueRange = 0.35f..0.55f,
-            steps = 0,
-            onValueChange = onSplitRatioChange
-        )
-
-        Spacer(Modifier.height(18.dp))
-        SectionTitle("Visibility")
-        SwitchRow("Show search", settings.showSearch, onShowSearchChange)
-        SwitchRow("Alphabet sidebar", settings.showAlphabet, onShowAlphabetChange)
-
-        Spacer(Modifier.height(18.dp))
-        SectionTitle("Typography")
-        LabeledSlider(
-            label = "App text scale",
-            value = settings.appTextScale,
-            valueRange = 0.85f..1.20f,
-            steps = 0,
-            onValueChange = onAppTextScaleChange
-        )
-        LabeledSlider(
-            label = "Clock text scale",
-            value = settings.clockTextScale,
-            valueRange = 0.90f..1.30f,
-            steps = 0,
-            onValueChange = onClockTextScaleChange
-        )
-
-        Spacer(Modifier.height(18.dp))
-        SectionTitle("Style")
-        SwitchRow("Monochrome icons", settings.monochromeIcons, onMonochromeIconsChange)
-        SwitchRow("Haptic feedback", settings.haptic, onHapticChange)
-
-        Spacer(Modifier.height(10.dp))
     }
 }
 
@@ -119,7 +120,6 @@ private fun LabeledSlider(
     label: String,
     value: Float,
     valueRange: ClosedFloatingPointRange<Float>,
-    steps: Int,
     onValueChange: (Float) -> Unit
 ) {
     Column(Modifier.fillMaxWidth()) {
@@ -130,8 +130,7 @@ private fun LabeledSlider(
         Slider(
             value = value,
             onValueChange = onValueChange,
-            valueRange = valueRange,
-            steps = steps
+            valueRange = valueRange
         )
     }
 }

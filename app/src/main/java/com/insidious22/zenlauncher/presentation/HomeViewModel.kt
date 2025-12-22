@@ -4,13 +4,13 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.insidious22.zenlauncher.data.AppsRepository
+import com.insidious22.zenlauncher.data.CategoryClassifier
 import com.insidious22.zenlauncher.data.FavoritesStore
 import com.insidious22.zenlauncher.data.SettingsStore
 import com.insidious22.zenlauncher.domain.AppModel
+import com.insidious22.zenlauncher.domain.Category
 import com.insidious22.zenlauncher.domain.ThemeMode
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
@@ -18,25 +18,55 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private val appsRepo = AppsRepository(context = application)
     private val favoritesStore = FavoritesStore(application)
     private val settingsStore = SettingsStore(context = application)
+    private val classifier = CategoryClassifier()
 
-    // Apps: como AppsRepository NO tiene appsFlow, lo creamos aquí.
-    private val _appsFlow = MutableStateFlow<List<AppModel>>(emptyList())
-    val appsFlow: StateFlow<List<AppModel>> = _appsFlow.asStateFlow()
-
+    private val _allApps = MutableStateFlow<List<AppModel>>(emptyList())
     val favoritesFlow = favoritesStore.favoritesFlow
     val settingsFlow = settingsStore.settingsFlow
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
+    private val _selectedCategory = MutableStateFlow(Category.ALL)
+    val selectedCategory: StateFlow<Category> = _selectedCategory.asStateFlow()
+
+    // cache: package -> categories
+    private val _categoryMap = MutableStateFlow<Map<String, Set<Category>>>(emptyMap())
+
+    val filteredAppsFlow: StateFlow<List<AppModel>> =
+        combine(_allApps, favoritesFlow, _searchQuery, _selectedCategory, _categoryMap) { apps, favs, query, cat, catMap ->
+
+            val base = when (cat) {
+                Category.ALL -> apps
+                Category.FAVORITES -> apps.filter { it.packageName in favs }
+                Category.WORK -> apps.filter { catMap[it.packageName]?.contains(Category.WORK) == true }
+                Category.MEDIA -> apps.filter { catMap[it.packageName]?.contains(Category.MEDIA) == true }
+            }
+
+            val q = query.trim()
+            if (q.isBlank()) base
+            else base.filter { it.label.contains(q, ignoreCase = true) }
+
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     init {
         viewModelScope.launch {
-            _appsFlow.value = appsRepo.getInstalledApps()
+            val apps = appsRepo.getInstalledApps()
+            _allApps.value = apps
+
+            val map = buildMap<String, Set<Category>> {
+                apps.forEach { put(it.packageName, classifier.categoryFor(it)) }
+            }
+            _categoryMap.value = map
         }
     }
 
     fun onSearchTextChange(text: String) {
         _searchQuery.value = text
+    }
+
+    fun setCategory(category: Category) {
+        _selectedCategory.value = category
     }
 
     fun toggleFavorite(packageName: String) = viewModelScope.launch {

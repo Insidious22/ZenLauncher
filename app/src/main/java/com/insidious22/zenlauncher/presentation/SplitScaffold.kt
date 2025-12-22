@@ -15,43 +15,37 @@ fun SplitScaffold(
     leftContent: @Composable ColumnScope.() -> Unit,
     rightContent: @Composable ColumnScope.() -> Unit
 ) {
-    Box(modifier.fillMaxSize()) {
+    Row(modifier.fillMaxSize()) {
 
-        // Fondo general (puede ser el oscuro)
-        Row(Modifier.fillMaxSize()) {
-            // Panel izquierdo (claro)
-            Column(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .weight(leftRatio)
-                    .background(ZenPalette.Peach),
-                content = leftContent
-            )
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .weight(leftRatio)
+                .background(ZenPalette.Peach),
+            content = leftContent
+        )
 
-            // Panel derecho (oscuro)
-            Column(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .weight(1f - leftRatio)
-                    .background(ZenPalette.Brown),
-                content = rightContent
-            )
-        }
-
-        // “Seam shadow” suave en la división para dar profundidad
+        // Seam shadow (queda justo en la división, sin offsets raros)
         Box(
             modifier = Modifier
                 .fillMaxHeight()
-                .width(18.dp)
-                .offset(x = 0.dp) // se posiciona encima; HomeScreen lo alinea con Row
+                .width(14.dp)
                 .background(
                     Brush.horizontalGradient(
                         colors = listOf(
-                            Color.Black.copy(alpha = 0.22f),
+                            Color.Black.copy(alpha = 0.18f),
                             Color.Transparent
                         )
                     )
                 )
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .weight(1f - leftRatio)
+                .background(ZenPalette.Brown),
+            content = rightContent
         )
     }
 }
