@@ -8,7 +8,7 @@ import com.insidious22.zenlauncher.domain.ZenSettings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-private val Context.dataStore by preferencesDataStore(name = "zen_settings")
+private val Context.settingsDataStore by preferencesDataStore(name = "zen_settings")
 
 class SettingsStore(private val context: Context) {
 
@@ -24,7 +24,7 @@ class SettingsStore(private val context: Context) {
         val APPWIDGET_ID = intPreferencesKey("appwidget_id")
     }
 
-    val settingsFlow: Flow<ZenSettings> = context.dataStore.data.map { prefs ->
+    val settingsFlow: Flow<ZenSettings> = context.settingsDataStore.data.map { prefs ->
         val mode = runCatching {
             ThemeMode.valueOf(prefs[Keys.THEME_MODE] ?: ThemeMode.SYSTEM.name)
         }.getOrElse { ThemeMode.SYSTEM }
@@ -42,39 +42,13 @@ class SettingsStore(private val context: Context) {
         )
     }
 
-    suspend fun setSplitRatio(value: Float) {
-        context.dataStore.edit { it[Keys.SPLIT_RATIO] = value }
-    }
-
-    suspend fun setShowSearch(value: Boolean) {
-        context.dataStore.edit { it[Keys.SHOW_SEARCH] = value }
-    }
-
-    suspend fun setShowAlphabet(value: Boolean) {
-        context.dataStore.edit { it[Keys.SHOW_ALPHABET] = value }
-    }
-
-    suspend fun setAppTextScale(value: Float) {
-        context.dataStore.edit { it[Keys.APP_TEXT_SCALE] = value }
-    }
-
-    suspend fun setClockTextScale(value: Float) {
-        context.dataStore.edit { it[Keys.CLOCK_TEXT_SCALE] = value }
-    }
-
-    suspend fun setMonochromeIcons(value: Boolean) {
-        context.dataStore.edit { it[Keys.MONOCHROME_ICONS] = value }
-    }
-
-    suspend fun setHaptic(value: Boolean) {
-        context.dataStore.edit { it[Keys.HAPTIC] = value }
-    }
-
-    suspend fun setThemeMode(value: ThemeMode) {
-        context.dataStore.edit { it[Keys.THEME_MODE] = value.name }
-    }
-
-    suspend fun setAppWidgetId(value: Int) {
-        context.dataStore.edit { it[Keys.APPWIDGET_ID] = value }
-    }
+    suspend fun setSplitRatio(value: Float) { context.settingsDataStore.edit { it[Keys.SPLIT_RATIO] = value } }
+    suspend fun setShowSearch(value: Boolean) { context.settingsDataStore.edit { it[Keys.SHOW_SEARCH] = value } }
+    suspend fun setShowAlphabet(value: Boolean) { context.settingsDataStore.edit { it[Keys.SHOW_ALPHABET] = value } }
+    suspend fun setAppTextScale(value: Float) { context.settingsDataStore.edit { it[Keys.APP_TEXT_SCALE] = value } }
+    suspend fun setClockTextScale(value: Float) { context.settingsDataStore.edit { it[Keys.CLOCK_TEXT_SCALE] = value } }
+    suspend fun setMonochromeIcons(value: Boolean) { context.settingsDataStore.edit { it[Keys.MONOCHROME_ICONS] = value } }
+    suspend fun setHaptic(value: Boolean) { context.settingsDataStore.edit { it[Keys.HAPTIC] = value } }
+    suspend fun setThemeMode(value: ThemeMode) { context.settingsDataStore.edit { it[Keys.THEME_MODE] = value.name } }
+    suspend fun setAppWidgetId(value: Int) { context.settingsDataStore.edit { it[Keys.APPWIDGET_ID] = value } }
 }

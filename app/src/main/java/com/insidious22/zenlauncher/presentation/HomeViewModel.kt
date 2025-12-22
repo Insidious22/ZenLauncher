@@ -4,8 +4,9 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.insidious22.zenlauncher.data.AppsRepository
-import com.insidious22.zenlauncher.data.FavoriteStore
+import com.insidious22.zenlauncher.data.FavoritesStore
 import com.insidious22.zenlauncher.data.SettingsStore
+import com.insidious22.zenlauncher.domain.AppModel
 import com.insidious22.zenlauncher.domain.ThemeMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,26 +16,33 @@ import kotlinx.coroutines.launch
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     private val appsRepo = AppsRepository(context = application)
-    private val favoritesStore = FavoriteStore(application)
+    private val favoritesStore = FavoritesStore(application)
     private val settingsStore = SettingsStore(context = application)
 
-    // Flows “directos” (HomeScreen usa collectAsState(initial=...))
-    val appsFlow = appsRepo.appsFlow
+    // Apps: como AppsRepository NO tiene appsFlow, lo creamos aquí.
+    private val _appsFlow = MutableStateFlow<List<AppModel>>(emptyList())
+    val appsFlow: StateFlow<List<AppModel>> = _appsFlow.asStateFlow()
+
     val favoritesFlow = favoritesStore.favoritesFlow
     val settingsFlow = settingsStore.settingsFlow
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
+    init {
+        viewModelScope.launch {
+            _appsFlow.value = appsRepo.getInstalledApps()
+        }
+    }
+
     fun onSearchTextChange(text: String) {
         _searchQuery.value = text
     }
 
     fun toggleFavorite(packageName: String) = viewModelScope.launch {
-        favoritesStore.toggle(packageName)
+        favoritesStore.toggleFavorite(packageName)
     }
 
-    // ---- Settings setters (persisten offline) ----
     fun setSplitRatio(value: Float) = viewModelScope.launch { settingsStore.setSplitRatio(value) }
     fun setShowSearch(value: Boolean) = viewModelScope.launch { settingsStore.setShowSearch(value) }
     fun setShowAlphabet(value: Boolean) = viewModelScope.launch { settingsStore.setShowAlphabet(value) }
