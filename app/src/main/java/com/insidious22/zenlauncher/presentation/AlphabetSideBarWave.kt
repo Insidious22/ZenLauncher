@@ -2,9 +2,16 @@ package com.insidious22.zenlauncher.presentation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -12,11 +19,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.math.PI
 import kotlin.math.abs
-import kotlin.math.exp
+import kotlin.math.cos
 
 @Composable
 fun AlphabetSideBarWave(
@@ -24,32 +33,45 @@ fun AlphabetSideBarWave(
     onLetterSelected: (index: Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    if (letters.isEmpty()) return
+
     var size by remember { mutableStateOf(IntSize.Zero) }
     var fingerY by remember { mutableStateOf<Float?>(null) }
+    var lastSelectedIndex by remember { mutableStateOf(-1) }
 
     fun indexFromY(y: Float): Int {
         val h = size.height.toFloat().coerceAtLeast(1f)
-        val itemH = (h / letters.size.toFloat()).coerceAtLeast(1f)
+        val itemH = h / letters.size.toFloat().coerceAtLeast(1f)
         return (y / itemH).toInt().coerceIn(0, letters.size - 1)
     }
+
+    val density = LocalDensity.current
 
     Box(
         modifier = modifier
             .width(52.dp)
             .fillMaxHeight()
-            .padding(end = 8.dp)
+            .padding(end = 10.dp)
             .clip(RoundedCornerShape(999.dp))
-            .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.08f))
+            .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.06f))
             .onSizeChanged { size = it }
             .pointerInput(letters) {
                 detectVerticalDragGestures(
                     onDragStart = { offset ->
                         fingerY = offset.y
-                        onLetterSelected(indexFromY(offset.y))
+                        val index = indexFromY(offset.y)
+                        if (index != lastSelectedIndex) {
+                            onLetterSelected(index)
+                            lastSelectedIndex = index
+                        }
                     },
                     onVerticalDrag = { change, _ ->
                         fingerY = change.position.y
-                        onLetterSelected(indexFromY(change.position.y))
+                        val index = indexFromY(change.position.y)
+                        if (index != lastSelectedIndex) {
+                            onLetterSelected(index)
+                            lastSelectedIndex = index
+                        }
                         change.consume()
                     },
                     onDragEnd = { fingerY = null },
@@ -58,30 +80,37 @@ fun AlphabetSideBarWave(
             }
     ) {
         Column(
-            modifier = Modifier
+            Modifier
                 .fillMaxSize()
                 .padding(vertical = 10.dp),
             verticalArrangement = Arrangement.SpaceEvenly,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val h = size.height.toFloat().coerceAtLeast(1f)
-            val itemH = (h / letters.size.toFloat()).coerceAtLeast(1f)
-
             letters.forEachIndexed { i, ch ->
-                val centerY = (i + 0.5f) * itemH
-                val dy = fingerY?.let { abs(it - centerY) } ?: 99999f
+                val centerY = if (size.height == 0) 0f else {
+                    val itemH = size.height / letters.size.toFloat()
+                    (i * itemH) + itemH / 2f
+                }
 
-                val t = exp(-(dy / (itemH * 1.6f)))
-                val scale = 1f + 0.28f * t
-                val alpha = 0.45f + 0.55f * t
+                val dist = fingerY?.let { abs(it - centerY) } ?: Float.MAX_VALUE
+                
+                val waveWidth = size.height * 0.3f
+                val t = (1f - (dist / waveWidth)).coerceIn(0f, 1f)
+                val easedT = (0.5f - 0.5f * cos(t * PI.toFloat()))
 
-                androidx.compose.material3.Text(
+                val scale = 1f + 0.4f * easedT
+                val translationX = with(density) { (-12).dp.toPx() } * easedT
+                val alpha = 0.5f + 0.5f * easedT
+
+                Text(
                     text = ch,
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = alpha),
+                    fontSize = 11.sp,
+                    color = ZenPalette.Cream, // Use full color, adjust with alpha
                     modifier = Modifier.graphicsLayer {
-                        scaleX = scale
-                        scaleY = scale
+                        this.scaleX = scale
+                        this.scaleY = scale
+                        this.translationX = translationX
+                        this.alpha = alpha
                     }
                 )
             }

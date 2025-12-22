@@ -13,23 +13,27 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.insidious22.zenlauncher.domain.Category
-import kotlin.math.abs
-import kotlin.math.roundToInt
+import kotlin.math.*
 
 @Composable
 fun CategoryWaveBar(
     categories: List<Category>,
     selected: Category,
     onSelected: (Category) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onSelectedCommit: ((Category) -> Unit)? = null
 ) {
+    if (categories.isEmpty()) return
+
     var widthPx by remember { mutableStateOf(1f) }
     var dragging by remember { mutableStateOf(false) }
     var dragX by remember { mutableStateOf(0f) }
@@ -45,14 +49,16 @@ fun CategoryWaveBar(
     }
 
     LaunchedEffect(activeIndex, widthPx) {
-        val target = activeIndex * itemW()
-        highlightX.animateTo(
-            target,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioNoBouncy,
-                stiffness = Spring.StiffnessMediumLow
+        if (widthPx > 1f) { // Ensure width is calculated
+            val target = activeIndex * itemW()
+            highlightX.animateTo(
+                target,
+                animationSpec = spring(
+                    dampingRatio = 0.8f, // A bit more bouncy
+                    stiffness = Spring.StiffnessMedium
+                )
             )
-        )
+        }
     }
 
     Surface(
@@ -62,56 +68,85 @@ fun CategoryWaveBar(
             .clip(RoundedCornerShape(16.dp))
             .onSizeChanged { widthPx = it.width.toFloat().coerceAtLeast(1f) }
             .background(ZenPalette.Cream.copy(alpha = 0.10f))
-            .pointerInput(categories, selected) {
+            .pointerInput(categories) {
+                var lastIdx = -1
+
                 detectHorizontalDragGestures(
                     onDragStart = { offset ->
                         dragging = true
-                        dragX = offset.x
-                        onSelected(categories[indexFromX(dragX)])
+                        dragX = offset.x.coerceIn(0f, widthPx)
+                        val idx = indexFromX(dragX)
+                        lastIdx = idx
+                        onSelected(categories[idx])
                     },
                     onHorizontalDrag = { change, amount ->
                         dragX = (dragX + amount).coerceIn(0f, widthPx)
-                        onSelected(categories[indexFromX(dragX)])
+                        val idx = indexFromX(dragX)
+
+                        if (idx != lastIdx) {
+                            lastIdx = idx
+                            onSelected(categories[idx])
+                        }
                         change.consume()
                     },
-                    onDragEnd = { dragging = false },
-                    onDragCancel = { dragging = false }
+                    onDragEnd = {
+                        dragging = false
+                        val idx = indexFromX(dragX)
+                        onSelectedCommit?.invoke(categories[idx])
+                    },
+                    onDragCancel = {
+                        dragging = false
+                        onSelected(selected)
+                    }
                 )
             },
-        color = androidx.compose.ui.graphics.Color.Transparent,
-        contentColor = androidx.compose.ui.graphics.Color.Transparent
+        color = Color.Transparent,
+        contentColor = Color.Transparent
     ) {
         Box(Modifier.fillMaxSize()) {
 
-            // Highlight pill
-            val pillLeftPx = if (dragging) indexFromX(dragX) * itemW() else highlightX.value
-            val pillLeftDp = (pillLeftPx / widthPx) * (/*52dp height irrelevant*/ 0f)
+            val pillWidthPx = itemW()
+            val pillLeftPx = if (dragging) {
+                (indexFromX(dragX) * itemW())
+            } else {
+                highlightX.value
+            }
 
-            // No usamos conversion px->dp aquí: usamos offset via padding con pesos + Spacer.
-            // Para mantenerlo simple y estable: hacemos “pill” con Row de pesos.
-            Row(Modifier.fillMaxSize().padding(6.dp)) {
-                val leftWeight = (pillLeftPx / itemW()).coerceIn(0f, categories.size.toFloat())
-                Spacer(Modifier.weight(leftWeight))
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(6.dp)
+            ) {
                 Box(
                     modifier = Modifier
                         .fillMaxHeight()
-                        .weight(1f)
+                        .graphicsLayer { translationX = pillLeftPx }
+                        .width(with(LocalDensity.current) { pillWidthPx.toDp() })
                         .clip(RoundedCornerShape(14.dp))
                         .background(ZenPalette.Cream.copy(alpha = 0.22f))
                 )
-                Spacer(Modifier.weight((categories.size - 1f - leftWeight).coerceAtLeast(0f)))
             }
 
-            // Labels
             Row(Modifier.fillMaxSize()) {
+                val density = LocalDensity.current
+
                 categories.forEachIndexed { i, cat ->
                     val isSelected = cat == selected
 
                     val center = (i * itemW()) + itemW() / 2f
-                    val finger = if (dragging) dragX else center
+                    val finger = if (dragging) dragX else highlightX.value + pillWidthPx / 2f
                     val dist = abs(finger - center)
-                    val t = (1f - (dist / (itemW() * 1.4f))).coerceIn(0f, 1f)
-                    val scale = 1f + 0.06f * t
+
+                    val waveWidth = itemW() * 2.0f
+                    val t = (1f - (dist / waveWidth)).coerceIn(0f, 1f)
+                    
+                    val easedT = (0.5f - 0.5f * cos(t * PI.toFloat()))
+
+                    val scale = 1f + 0.1f * easedT
+                    val translationY = with(density) { (6.dp).toPx() } * (1 - easedT)
+                    val alpha = 0.6f + 0.4f * easedT
+                    val rotationX = -10 * (1 - easedT)
+
 
                     Box(
                         modifier = Modifier
@@ -123,10 +158,12 @@ fun CategoryWaveBar(
                             text = cat.label,
                             fontSize = 13.sp,
                             fontWeight = if (isSelected) FontWeight.Black else FontWeight.SemiBold,
-                            color = ZenPalette.Cream.copy(alpha = if (isSelected) 0.95f else 0.65f),
+                            color = ZenPalette.Cream.copy(alpha = alpha),
                             modifier = Modifier.graphicsLayer {
-                                scaleX = scale
-                                scaleY = scale
+                                this.scaleX = scale
+                                this.scaleY = scale
+                                this.translationY = translationY
+                                this.rotationX = rotationX
                             }
                         )
                     }
