@@ -1,4 +1,4 @@
-# ZenLauncher 🧘‍♂️📱 (WIP / experimento)
+# ZenLauncher  (WIP / experimento)
 
 > **Una vaina hecho frankenstein a ver que sale si me gusta o no.**  
 > Este repo es un laboratorio: acá pruebo ideas de UI/UX, rendimiento y sensaciones de “launcher minimalista” sin prometer nada serio… todavía. :contentReference[oaicite:1]{index=1}
@@ -8,13 +8,13 @@ Enfoque: **minimalismo**, fluidez y experimentar con interacciones “Zen” (an
 
 ---
 
-## 🧠 Qué es este proyecto (en una línea)
+## Qué es este proyecto (en una línea)
 Un **launcher minimalista** en Kotlin, construido como **experimento** para probar ideas sin miedo a romper cosas.
 
 ---
 
-## ✅ Estado actual
-🚧 **WIP** (Work in progress). No hay releases publicadas todavía. :contentReference[oaicite:4]{index=4}
+## Estado actual
+**WIP** (Work in progress). No hay releases publicadas todavía. :contentReference[oaicite:4]{index=4}
 
 Lo que significa:
 - Puede cambiar sin aviso
@@ -23,7 +23,7 @@ Lo que significa:
 
 ---
 
-## 🎯 Objetivos del experimento
+## Objetivos del experimento
 - **UI limpia y rápida** (sin saturación visual).
 - **Acciones directas**: menos taps, más intención.
 - **Sensación “Zen”**: transiciones, estados, micro-interacciones.
@@ -31,16 +31,12 @@ Lo que significa:
 
 ---
 
-## 🧩 Tech stack (lo visible desde el repo)
+## Tech stack (lo visible desde el repo)
 - **Kotlin** :contentReference[oaicite:5]{index=5}  
 - **Gradle (Kotlin DSL)** (`*.kts`) :contentReference[oaicite:6]{index=6}  
 - Android app module (`/app`) :contentReference[oaicite:7]{index=7}
 
-> Si luego quieres, puedo actualizar esta sección con librerías exactas (Compose, Room, etc.) cuando GitHub deje ver el contenido o me pegues tu `app/build.gradle.kts`.
-
----
-
-## 🗂️ Estructura del repo
+## Estructura del repo
 Estructura base (lo que se ve públicamente en la raíz): :contentReference[oaicite:8]{index=8}
 
 - `.idea/` — configuración del IDE (Android Studio / IntelliJ)
@@ -53,14 +49,14 @@ Estructura base (lo que se ve públicamente en la raíz): :contentReference[oaic
 
 ---
 
-## 🛠️ Requisitos
+## Requisitos
 - **Android Studio** (recomendado: estable más reciente)
 - **JDK 17** (o el que Android Studio te configure por defecto)
 - Android SDK instalado desde el SDK Manager
 
 ---
 
-## 🚀 Cómo compilar / correr
+## Cómo compilar / correr
 
 ### Opción A: Android Studio (la fácil)
 1. Clona el repo:
@@ -93,7 +89,7 @@ En Windows (PowerShell):
 .\gradlew.bat assembleDebug
 
 
-🏠 Ponerlo como launcher por defecto (Android)
+Ponerlo como launcher por defecto (Android)
 Cuando lo instales:
 Presiona Home
 Android te preguntará qué launcher usar
@@ -103,7 +99,7 @@ Si no te aparece:
 Ajustes → Apps → Apps predeterminadas → App de inicio (Home) → ZenLauncher
 
 
-🧪 Roadmap (ideas / cosas que podría meter)
+Roadmap (ideas / cosas que podría meter)
 Esto es intencionalmente flexible. Algunas ideas típicas para este tipo de launcher:
 
  Home minimal (apps esenciales / favoritos)
