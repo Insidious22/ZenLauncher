@@ -1,11 +1,10 @@
 # ZenLauncher  (WIP / experimento)
 
 > **Una vaina hecho frankenstein a ver que sale si me gusta o no.**  
-> Este repo es un laboratorio: acá pruebo ideas de UI/UX, rendimiento y sensaciones de “launcher minimalista” sin prometer nada serio… todavía. :contentReference[oaicite:1]{index=1}
+> Este repo es un laboratorio: acá pruebo ideas de UI/UX, rendimiento y sensaciones de “launcher minimalista” sin prometer nada serio… todavía.
 
-**ZenLauncher** es un launcher para Android hecho en **Kotlin** (100%). :contentReference[oaicite:2]{index=2}  
-Enfoque: **minimalismo**, fluidez y experimentar con interacciones “Zen” (animaciones, navegación, layout, etc). :contentReference[oaicite:3]{index=3}
-
+**ZenLauncher** es un launcher para Android hecho en **Kotlin**  
+Enfoque: **minimalismo**, fluidez y experimentar con interacciones “Zen” (animaciones, navegación, layout, etc).
 ---
 
 ## Qué es este proyecto (en una línea)
@@ -14,7 +13,7 @@ Un **launcher minimalista** en Kotlin, construido como **experimento** para prob
 ---
 
 ## Estado actual
-**WIP** (Work in progress). No hay releases publicadas todavía. :contentReference[oaicite:4]{index=4}
+**WIP** (Work in progress). No hay releases publicadas.
 
 Lo que significa:
 - Puede cambiar sin aviso
@@ -33,12 +32,10 @@ Lo que significa:
 
 ## Tech stack (lo visible desde el repo)
 - **Kotlin** :contentReference[oaicite:5]{index=5}  
-- **Gradle (Kotlin DSL)** (`*.kts`) :contentReference[oaicite:6]{index=6}  
-- Android app module (`/app`) :contentReference[oaicite:7]{index=7}
-
+- **Gradle (Kotlin DSL)** (`*.kts`)  
+- Android app module (`/app`) 
 ## Estructura del repo
-Estructura base (lo que se ve públicamente en la raíz): :contentReference[oaicite:8]{index=8}
-
+Estructura base (lo que se ve públicamente en la raíz):
 - `.idea/` — configuración del IDE (Android Studio / IntelliJ)
 - `app/` — módulo principal Android
 - `gradle/` — wrapper / configuración de Gradle
