@@ -1,24 +1,17 @@
 package com.insidious22.zenlauncher.presentation
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
@@ -40,12 +33,11 @@ fun AppsPanel(
     query: String,
     showSearch: Boolean,
     monochromeIcons: Boolean,
+    searchHint: String,
     onQueryChange: (String) -> Unit,
     onToggleFavorite: (String) -> Unit,
-    onOpenSettings: () -> Unit
+    onLaunchApp: (String) -> Unit
 ) {
-    val tint = remember { ColorFilter.tint(ZenPalette.DeepBlack, BlendMode.SrcAtop) }
-
     Column(Modifier.fillMaxSize()) {
         if (showSearch) {
             OutlinedTextField(
@@ -55,7 +47,7 @@ fun AppsPanel(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 30.dp, vertical = 8.dp),
-                label = { Text("Buscar...") },
+                label = { Text(searchHint) },
                 shape = MaterialTheme.shapes.medium
             )
         }
@@ -68,8 +60,7 @@ fun AppsPanel(
             itemsIndexed(apps, key = { _, app -> app.packageName }) { _, app ->
                 var itemY by remember { mutableStateOf(0f) }
                 val dist = interactionY?.let { abs(it - itemY) } ?: Float.MAX_VALUE
-                val range = 300f
-                val proximity = (1f - (dist / range)).coerceIn(0f, 1f)
+                val proximity = (1f - (dist / AnimationConstants.APPS_WAVE_RANGE_PX)).coerceIn(0f, 1f)
                 val wave = (0.5f - 0.5f * cos(proximity * PI.toFloat()))
 
                 Row(
@@ -77,31 +68,23 @@ fun AppsPanel(
                         .fillMaxWidth()
                         .onGloballyPositioned { itemY = it.positionInWindow().y + (it.size.height / 2) }
                         .graphicsLayer {
-                            translationX = -(wave * 35f).dp.toPx()
+                            translationX = -(wave * AnimationConstants.APPS_WAVE_TRANSLATION_DP).dp.toPx()
                             alpha = 0.5f + (0.5f * proximity)
                         }
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null,
-                            onClick = { onOpenSettings() }
+                            onClick = { onLaunchApp(app.packageName) }
                         )
                         .padding(vertical = 10.dp, horizontal = 45.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (app.icon != null) {
-                        Box(
-                            modifier = Modifier
-                                .size(30.dp)
-                                .clip(CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Image(
-                                bitmap = app.icon,
-                                contentDescription = null,
-                                modifier = Modifier.fillMaxSize(),
-                                colorFilter = if (monochromeIcons) tint else null
-                            )
-                        }
+                        AppIcon(
+                            icon = app.icon,
+                            monochrome = monochromeIcons,
+                            size = IconConstants.ICON_SIZE_SMALL
+                        )
                         Spacer(Modifier.width(18.dp))
                     }
                     Text(

@@ -1,3 +1,32 @@
 <resources>
     <string name="app_name">ZenLauncher</string>
+
+    <!-- Search -->
+    <string name="search_hint">Search…</string>
+
+    <!-- Clock Widget -->
+    <string name="time_prefix">It\'s</string>
+    <string name="swipe_to_return">Swipe to return</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_done">Done</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_layout">Layout</string>
+    <string name="settings_visibility">Visibility</string>
+    <string name="settings_typography">Typography</string>
+    <string name="settings_style">Style</string>
+    <string name="settings_split_ratio">Split ratio</string>
+    <string name="settings_show_search">Show search</string>
+    <string name="settings_alphabet_sidebar">Alphabet sidebar</string>
+    <string name="settings_app_text_scale">App text scale</string>
+    <string name="settings_clock_text_scale">Clock text scale</string>
+    <string name="settings_monochrome_icons">Monochrome icons</string>
+    <string name="settings_haptic_feedback">Haptic feedback</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+
+    <!-- App Preview -->
+    <string name="tap_to_launch">Tap to launch</string>
 </resources>

@@ -12,8 +12,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.insidious22.zenlauncher.R
+import com.insidious22.zenlauncher.domain.AppModel
 import com.insidious22.zenlauncher.domain.ZenSettings
 import com.insidious22.zenlauncher.ui.theme.ZenLauncherTheme
 import kotlinx.coroutines.launch
@@ -31,6 +34,8 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
 
     var interactionY by remember { mutableStateOf<Float?>(null) }
     var showSettings by remember { mutableStateOf(false) }
+    var highlightedApp by remember { mutableStateOf<AppModel?>(null) }
+    var isInteracting by remember { mutableStateOf(false) }
     val pagerState = rememberPagerState(pageCount = { 3 })
 
     BackHandler(enabled = showSettings || searchText.isNotEmpty()) {
@@ -62,7 +67,10 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
                             )
                         } else {
                             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                Text("Desliza para volver", color = ZenPalette.DeepBlack.copy(0.2f))
+                                Text(
+                                    stringResource(R.string.swipe_to_return),
+                                    color = ZenPalette.DeepBlack.copy(0.2f)
+                                )
                             }
                         }
                     }
@@ -78,9 +86,10 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
                         query = searchText,
                         showSearch = settings.showSearch,
                         monochromeIcons = settings.monochromeIcons,
+                        searchHint = stringResource(R.string.search_hint),
                         onQueryChange = viewModel::onSearchTextChange,
                         onToggleFavorite = viewModel::toggleFavorite,
-                        onOpenSettings = { showSettings = true }
+                        onLaunchApp = viewModel::launchApp
                     )
 
                     val letters = remember(apps) {
@@ -91,13 +100,20 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
 
                     AlphabetSideBarWave(
                         letters = letters,
-                        onInteraction = { y -> interactionY = y },
+                        onInteraction = { y ->
+                            interactionY = y
+                            isInteracting = y != null
+                            if (y == null) {
+                                highlightedApp = null
+                            }
+                        },
                         onLetterSelected = { index ->
                             scope.launch {
                                 val char = letters.getOrNull(index) ?: return@launch
                                 val appIndex = apps.indexOfFirst { it.label.startsWith(char, ignoreCase = true) }
                                 if (appIndex != -1) {
                                     listState.scrollToItem(appIndex)
+                                    highlightedApp = apps.getOrNull(appIndex)
                                 }
                             }
                         },
@@ -127,6 +143,13 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
                     )
                 }
             }
+
+            // App preview overlay (console-style)
+            AppPreviewOverlay(
+                app = highlightedApp,
+                visible = isInteracting && highlightedApp != null,
+                monochromeIcons = settings.monochromeIcons
+            )
         }
     }
 }

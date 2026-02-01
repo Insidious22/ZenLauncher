@@ -2,12 +2,13 @@ package com.insidious22.zenlauncher.presentation
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.insidious22.zenlauncher.R
 import com.insidious22.zenlauncher.domain.ThemeMode
 import com.insidious22.zenlauncher.domain.ZenSettings
 
@@ -40,50 +41,50 @@ fun SettingsSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    "Settings",
+                    stringResource(R.string.settings_title),
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.weight(1f)
                 )
-                TextButton(onClick = onClose) { Text("Done") }
+                TextButton(onClick = onClose) { Text(stringResource(R.string.settings_done)) }
             }
 
             Spacer(Modifier.height(14.dp))
-            SectionTitle("Theme")
+            SectionTitle(stringResource(R.string.settings_theme))
             ThemeChips(selected = settings.themeMode, onSelect = onThemeModeChange)
 
             Spacer(Modifier.height(18.dp))
-            SectionTitle("Layout")
+            SectionTitle(stringResource(R.string.settings_layout))
             LabeledSlider(
-                label = "Split ratio",
+                label = stringResource(R.string.settings_split_ratio),
                 value = settings.splitRatio,
                 valueRange = 0.35f..0.55f,
                 onValueChange = onSplitRatioChange
             )
 
             Spacer(Modifier.height(18.dp))
-            SectionTitle("Visibility")
-            SwitchRow("Show search", settings.showSearch, onShowSearchChange)
-            SwitchRow("Alphabet sidebar", settings.showAlphabet, onShowAlphabetChange)
+            SectionTitle(stringResource(R.string.settings_visibility))
+            SwitchRow(stringResource(R.string.settings_show_search), settings.showSearch, onShowSearchChange)
+            SwitchRow(stringResource(R.string.settings_alphabet_sidebar), settings.showAlphabet, onShowAlphabetChange)
 
             Spacer(Modifier.height(18.dp))
-            SectionTitle("Typography")
+            SectionTitle(stringResource(R.string.settings_typography))
             LabeledSlider(
-                label = "App text scale",
+                label = stringResource(R.string.settings_app_text_scale),
                 value = settings.appTextScale,
                 valueRange = 0.85f..1.20f,
                 onValueChange = onAppTextScaleChange
             )
             LabeledSlider(
-                label = "Clock text scale",
+                label = stringResource(R.string.settings_clock_text_scale),
                 value = settings.clockTextScale,
                 valueRange = 0.90f..1.30f,
                 onValueChange = onClockTextScaleChange
             )
 
             Spacer(Modifier.height(18.dp))
-            SectionTitle("Style")
-            SwitchRow("Monochrome icons", settings.monochromeIcons, onMonochromeIconsChange)
-            SwitchRow("Haptic feedback", settings.haptic, onHapticChange)
+            SectionTitle(stringResource(R.string.settings_style))
+            SwitchRow(stringResource(R.string.settings_monochrome_icons), settings.monochromeIcons, onMonochromeIconsChange)
+            SwitchRow(stringResource(R.string.settings_haptic_feedback), settings.haptic, onHapticChange)
         }
     }
 }
@@ -144,17 +145,17 @@ private fun ThemeChips(
         FilterChip(
             selected = selected == ThemeMode.SYSTEM,
             onClick = { onSelect(ThemeMode.SYSTEM) },
-            label = { Text("System") }
+            label = { Text(stringResource(R.string.theme_system)) }
         )
         FilterChip(
             selected = selected == ThemeMode.LIGHT,
             onClick = { onSelect(ThemeMode.LIGHT) },
-            label = { Text("Light") }
+            label = { Text(stringResource(R.string.theme_light)) }
         )
         FilterChip(
             selected = selected == ThemeMode.DARK,
             onClick = { onSelect(ThemeMode.DARK) },
-            label = { Text("Dark") }
+            label = { Text(stringResource(R.string.theme_dark)) }
         )
     }
 }

@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.map
 
 private val Context.favoritesDataStore by preferencesDataStore(name = "zen_prefs")
 
-class FavoritesStore(private val context: Context) {
+class FavoritesDataStore(private val context: Context) {
 
     private val FAV_KEY = stringSetPreferencesKey("favorite_apps")
 

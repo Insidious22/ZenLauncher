@@ -8,9 +8,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.insidious22.zenlauncher.R
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -43,14 +45,14 @@ fun ClockWidget(
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "It's ${time.format(DateTimeFormatter.ofPattern("hh:mm a"))}",
+            text = "${stringResource(R.string.time_prefix)} ${time.format(DateTimeFormatter.ofPattern("hh:mm a"))}",
             fontSize = (20.sp * clockScale),
             fontWeight = FontWeight.Black,
             color = ZenPalette.DeepBlack,
             letterSpacing = (-1).sp
         )
         Text(
-            text = java.time.LocalDate.now().format(DateTimeFormatter.ofPattern("EEEE, d MMM", Locale.ENGLISH)).uppercase(),
+            text = java.time.LocalDate.now().format(DateTimeFormatter.ofPattern("EEEE, d MMM", Locale.getDefault())).uppercase(),
             fontSize = (11.sp * clockScale),
             fontWeight = FontWeight.Bold,
             color = ZenPalette.DeepBlack.copy(alpha = 0.6f),
