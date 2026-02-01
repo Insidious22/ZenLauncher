@@ -1,24 +1,17 @@
 package com.insidious22.zenlauncher.presentation
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
@@ -45,8 +38,6 @@ fun AppsPanel(
     onToggleFavorite: (String) -> Unit,
     onLaunchApp: (String) -> Unit
 ) {
-    val tint = remember { ColorFilter.tint(ZenPalette.DeepBlack, BlendMode.SrcAtop) }
-
     Column(Modifier.fillMaxSize()) {
         if (showSearch) {
             OutlinedTextField(
@@ -89,19 +80,11 @@ fun AppsPanel(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (app.icon != null) {
-                        Box(
-                            modifier = Modifier
-                                .size(30.dp)
-                                .clip(CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Image(
-                                bitmap = app.icon,
-                                contentDescription = null,
-                                modifier = Modifier.fillMaxSize(),
-                                colorFilter = if (monochromeIcons) tint else null
-                            )
-                        }
+                        AppIcon(
+                            icon = app.icon,
+                            monochrome = monochromeIcons,
+                            size = IconConstants.ICON_SIZE_SMALL
+                        )
                         Spacer(Modifier.width(18.dp))
                     }
                     Text(

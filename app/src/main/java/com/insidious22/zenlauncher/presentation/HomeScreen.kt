@@ -147,7 +147,8 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
             // App preview overlay (console-style)
             AppPreviewOverlay(
                 app = highlightedApp,
-                visible = isInteracting && highlightedApp != null
+                visible = isInteracting && highlightedApp != null,
+                monochromeIcons = settings.monochromeIcons
             )
         }
     }

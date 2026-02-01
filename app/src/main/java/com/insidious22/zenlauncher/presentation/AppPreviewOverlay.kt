@@ -1,12 +1,9 @@
 package com.insidious22.zenlauncher.presentation
 
-import androidx.compose.animation.*
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,8 +14,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -32,6 +27,7 @@ import com.insidious22.zenlauncher.domain.AppModel
 fun AppPreviewOverlay(
     app: AppModel?,
     visible: Boolean,
+    monochromeIcons: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val transition = updateTransition(targetState = visible && app != null, label = "preview")
@@ -95,7 +91,9 @@ fun AppPreviewOverlay(
                 app.icon?.let { icon ->
                     AppIconLarge(
                         icon = icon,
-                        modifier = Modifier.size(120.dp)
+                        monochrome = monochromeIcons,
+                        tintColor = Color.White,
+                        backgroundColor = Color.White.copy(alpha = 0.1f)
                     )
                 }
 
@@ -143,28 +141,5 @@ fun AppPreviewOverlay(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun AppIconLarge(
-    icon: ImageBitmap,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(28.dp))
-            .background(Color.White.copy(alpha = 0.1f)),
-        contentAlignment = Alignment.Center
-    ) {
-        Image(
-            bitmap = icon,
-            contentDescription = null,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp)
-                .clip(RoundedCornerShape(20.dp)),
-            contentScale = ContentScale.Fit
-        )
     }
 }
