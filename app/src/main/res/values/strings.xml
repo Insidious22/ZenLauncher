@@ -26,4 +26,7 @@
     <string name="theme_system">System</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
+
+    <!-- App Preview -->
+    <string name="tap_to_launch">Tap to launch</string>
 </resources>
