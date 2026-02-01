@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.map
 
 private val Context.settingsDataStore by preferencesDataStore(name = "zen_settings")
 
-class SettingsStore(private val context: Context) {
+class SettingsDataStore(private val context: Context) {
 
     private object Keys {
         val SPLIT_RATIO = floatPreferencesKey("split_ratio")

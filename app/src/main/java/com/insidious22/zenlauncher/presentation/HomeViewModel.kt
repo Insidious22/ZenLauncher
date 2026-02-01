@@ -1,12 +1,13 @@
 package com.insidious22.zenlauncher.presentation
 
 import android.app.Application
+import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.insidious22.zenlauncher.data.AppsRepository
 import com.insidious22.zenlauncher.data.CategoryClassifier
-import com.insidious22.zenlauncher.data.FavoritesStore
-import com.insidious22.zenlauncher.data.SettingsStore
+import com.insidious22.zenlauncher.data.FavoritesDataStore
+import com.insidious22.zenlauncher.data.SettingsDataStore
 import com.insidious22.zenlauncher.domain.AppModel
 import com.insidious22.zenlauncher.domain.Category
 import com.insidious22.zenlauncher.domain.ThemeMode
@@ -16,8 +17,8 @@ import kotlinx.coroutines.launch
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     private val appsRepo = AppsRepository(context = application)
-    private val favoritesStore = FavoritesStore(application)
-    private val settingsStore = SettingsStore(context = application)
+    private val favoritesStore = FavoritesDataStore(application)
+    private val settingsStore = SettingsDataStore(context = application)
     private val classifier = CategoryClassifier()
 
     private val _allApps = MutableStateFlow<List<AppModel>>(emptyList())
@@ -80,4 +81,13 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     fun setMonochromeIcons(value: Boolean) = viewModelScope.launch { settingsStore.setMonochromeIcons(value) }
     fun setHaptic(value: Boolean) = viewModelScope.launch { settingsStore.setHaptic(value) }
     fun setThemeMode(value: ThemeMode) = viewModelScope.launch { settingsStore.setThemeMode(value) }
+
+    fun launchApp(packageName: String) {
+        val context = getApplication<Application>()
+        val intent = context.packageManager.getLaunchIntentForPackage(packageName)
+        intent?.let {
+            it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(it)
+        }
+    }
 }

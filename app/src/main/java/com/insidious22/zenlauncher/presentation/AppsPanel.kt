@@ -40,9 +40,10 @@ fun AppsPanel(
     query: String,
     showSearch: Boolean,
     monochromeIcons: Boolean,
+    searchHint: String,
     onQueryChange: (String) -> Unit,
     onToggleFavorite: (String) -> Unit,
-    onOpenSettings: () -> Unit
+    onLaunchApp: (String) -> Unit
 ) {
     val tint = remember { ColorFilter.tint(ZenPalette.DeepBlack, BlendMode.SrcAtop) }
 
@@ -55,7 +56,7 @@ fun AppsPanel(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 30.dp, vertical = 8.dp),
-                label = { Text("Buscar...") },
+                label = { Text(searchHint) },
                 shape = MaterialTheme.shapes.medium
             )
         }
@@ -68,8 +69,7 @@ fun AppsPanel(
             itemsIndexed(apps, key = { _, app -> app.packageName }) { _, app ->
                 var itemY by remember { mutableStateOf(0f) }
                 val dist = interactionY?.let { abs(it - itemY) } ?: Float.MAX_VALUE
-                val range = 300f
-                val proximity = (1f - (dist / range)).coerceIn(0f, 1f)
+                val proximity = (1f - (dist / AnimationConstants.APPS_WAVE_RANGE_PX)).coerceIn(0f, 1f)
                 val wave = (0.5f - 0.5f * cos(proximity * PI.toFloat()))
 
                 Row(
@@ -77,13 +77,13 @@ fun AppsPanel(
                         .fillMaxWidth()
                         .onGloballyPositioned { itemY = it.positionInWindow().y + (it.size.height / 2) }
                         .graphicsLayer {
-                            translationX = -(wave * 35f).dp.toPx()
+                            translationX = -(wave * AnimationConstants.APPS_WAVE_TRANSLATION_DP).dp.toPx()
                             alpha = 0.5f + (0.5f * proximity)
                         }
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null,
-                            onClick = { onOpenSettings() }
+                            onClick = { onLaunchApp(app.packageName) }
                         )
                         .padding(vertical = 10.dp, horizontal = 45.dp),
                     verticalAlignment = Alignment.CenterVertically

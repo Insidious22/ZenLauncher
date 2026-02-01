@@ -70,20 +70,20 @@ fun AlphabetSideBarWave(
                 val itemH = if (size.height > 0) size.height / letters.size.toFloat() else 1f
                 val centerY = (i * itemH) + itemH / 2f
                 val dist = fingerY?.let { abs(it - centerY) } ?: Float.MAX_VALUE
-                val t = (1f - (dist / 280f)).coerceIn(0f, 1f)
-                val wave = (0.5f - 0.5f * cos(t * PI.toFloat())).pow(1.8f)
+                val t = (1f - (dist / AnimationConstants.ALPHABET_WAVE_RANGE_PX)).coerceIn(0f, 1f)
+                val wave = (0.5f - 0.5f * cos(t * PI.toFloat())).pow(AnimationConstants.ALPHABET_WAVE_POWER)
 
                 Text(
                     text = ch,
                     fontSize = 11.sp,
                     fontWeight = if (wave > 0.5f) FontWeight.Black else FontWeight.Normal,
-                    color = ZenPalette.DeepBlack.copy(alpha = 0.3f + (0.7f * wave)),
+                    color = ZenPalette.DeepBlack.copy(alpha = AnimationConstants.ALPHABET_MIN_ALPHA + (AnimationConstants.ALPHABET_MAX_ALPHA * wave)),
                     modifier = Modifier
                         .padding(end = 12.dp)
                         .graphicsLayer {
-                            scaleX = 1f + (2.5f * wave)
-                            scaleY = 1f + (2.5f * wave)
-                            translationX = -(wave * 90f).dp.toPx()
+                            scaleX = 1f + (AnimationConstants.ALPHABET_MAX_SCALE * wave)
+                            scaleY = 1f + (AnimationConstants.ALPHABET_MAX_SCALE * wave)
+                            translationX = -(wave * AnimationConstants.ALPHABET_WAVE_TRANSLATION_DP).dp.toPx()
                         }
                 )
             }

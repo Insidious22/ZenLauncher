@@ -12,12 +12,13 @@ import android.util.LruCache
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import com.insidious22.zenlauncher.domain.AppModel
+import com.insidious22.zenlauncher.presentation.AnimationConstants
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class AppsRepository(private val context: Context) {
 
-    private val iconCache = LruCache<String, ImageBitmap>(220)
+    private val iconCache = LruCache<String, ImageBitmap>(AnimationConstants.ICON_CACHE_SIZE)
 
     suspend fun getInstalledApps(): List<AppModel> = withContext(Dispatchers.IO) {
         val pm = context.packageManager

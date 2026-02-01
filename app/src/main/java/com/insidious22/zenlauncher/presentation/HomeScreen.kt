@@ -12,8 +12,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.insidious22.zenlauncher.R
 import com.insidious22.zenlauncher.domain.ZenSettings
 import com.insidious22.zenlauncher.ui.theme.ZenLauncherTheme
 import kotlinx.coroutines.launch
@@ -62,7 +64,10 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
                             )
                         } else {
                             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                Text("Desliza para volver", color = ZenPalette.DeepBlack.copy(0.2f))
+                                Text(
+                                    stringResource(R.string.swipe_to_return),
+                                    color = ZenPalette.DeepBlack.copy(0.2f)
+                                )
                             }
                         }
                     }
@@ -78,9 +83,10 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
                         query = searchText,
                         showSearch = settings.showSearch,
                         monochromeIcons = settings.monochromeIcons,
+                        searchHint = stringResource(R.string.search_hint),
                         onQueryChange = viewModel::onSearchTextChange,
                         onToggleFavorite = viewModel::toggleFavorite,
-                        onOpenSettings = { showSettings = true }
+                        onLaunchApp = viewModel::launchApp
                     )
 
                     val letters = remember(apps) {
