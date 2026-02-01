@@ -91,9 +91,7 @@ fun AppPreviewOverlay(
                 app.icon?.let { icon ->
                     AppIconLarge(
                         icon = icon,
-                        monochrome = monochromeIcons,
-                        tintColor = Color.White,
-                        backgroundColor = Color.White.copy(alpha = 0.1f)
+                        monochrome = monochromeIcons
                     )
                 }
 
